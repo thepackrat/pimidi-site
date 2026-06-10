@@ -1,0 +1,81 @@
+---
+title: pimidi
+description: A touchscreen MIDI patchbay you can build yourself. Routes USB MIDI, joins Macs and other pimidis over the network, remembers your rig.
+template: splash
+hero:
+  tagline: A touchscreen MIDI patchbay you can build yourself. Routes USB MIDI, joins Macs and other pimidis over the network, remembers your rig.
+  actions:
+    - text: Read the docs
+      link: /docs/welcome/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/thepackrat/pimidi
+      icon: external
+sidebar:
+  hidden: true
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## What it does
+
+<CardGrid stagger>
+  <Card title="Touchscreen patchbay" icon="laptop">
+    Sources down, destinations across. Tap a cell to route, long-press
+    to add a filter or transform. The matrix is the same SPA from any
+    phone or laptop on the LAN.
+  </Card>
+  <Card title="Real Network MIDI" icon="rocket">
+    Native AppleMIDI / RTP-MIDI built in. Mac sessions, iOS, other
+    pimidis — all discovered via mDNS, no sidecar daemon, no extra
+    config.
+  </Card>
+  <Card title="Reliability layer" icon="approve-check">
+    Three-way UDP redundancy + 100ms note-state beacon + a TCP
+    companion channel between paired pimidis. Survives bursty WiFi
+    loss without stuck notes — a problem the RTP-MIDI spec doesn't
+    solve on its own.
+  </Card>
+  <Card title="Multi-pimidi rigs" icon="puzzle">
+    Pair multiple pimidis on the LAN. View any peer's UI from any
+    other unit's touchscreen. Routing snapshots share across the
+    studio via Linked Banks.
+  </Card>
+  <Card title="Per-route shaping" icon="setting">
+    Channel remap, transpose, velocity curves, CC remap — stacked
+    freely across four layers (default / source / route / dest).
+    Plus key-splits: turn one keyboard into two patchable rows.
+  </Card>
+  <Card title="Live tools" icon="puzzle">
+    Master clock with tap-tempo and a routable click. Bar-locked
+    multi-track looper. Single-shot clip recorder. Live MIDI event
+    monitor with multi-target capture and pre/post inspection.
+  </Card>
+  <Card title="Routing snapshots" icon="bookmark">
+    Save the whole matrix as a preset. Tap a tile to flip the rig
+    between songs. Pages of presets, Banks you curate by hand,
+    automatic held-note flush on recall.
+  </Card>
+  <Card title="Built for kiosks" icon="information">
+    Runs on a Raspberry Pi 5 with a touchscreen. On-screen virtual
+    keyboard for renaming devices. Auto-reload after deploy. No
+    mouse, no system keyboard, no fuss.
+  </Card>
+</CardGrid>
+
+## What it isn't
+
+- An audio interface. pimidi is MIDI only.
+- A computer-replacement. Pair it with whatever DAW you already use.
+- A walled-garden product. The whole thing is open source; you build
+  it from a Pi and a screen.
+
+## How to get one
+
+You build it. The repo at
+[github.com/thepackrat/pimidi](https://github.com/thepackrat/pimidi)
+has the install script, the cross-compile setup, and the wiring
+notes. Bill of materials is a Raspberry Pi 5, a USB-powered MIDI
+interface or two, a touchscreen, and an SD card. See
+[Connecting](/docs/connecting/) once you've got it up.

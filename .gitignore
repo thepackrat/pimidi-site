@@ -1,0 +1,25 @@
+# Build artefacts
+dist/
+.astro/
+
+# Synced docs — pulled from the code repo at build time; we don't
+# want either repo to drift via accidental commits here.
+src/content/docs/*.md
+src/content/docs/_sidebar.json
+# (the marketing landing index.mdx IS committed; only the synced .md
+# files and the generated sidebar manifest are gitignored.)
+
+# Deps
+node_modules/
+
+# Editor / OS noise
+.DS_Store
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+
+# Env
+.env
+.env.production
+.env.local

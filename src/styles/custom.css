@@ -1,0 +1,16 @@
+/* Site-wide tweaks layered on top of Starlight's default theme.
+   Starlight ships its own CSS custom properties; override only the
+   ones we actually want to differ. */
+
+:root {
+  --sl-font: "Inter", system-ui, sans-serif;
+  --sl-color-accent: #60a5fa;        /* same blue as the pimidi SPA */
+  --sl-color-accent-low: #1e3a5f;
+  --sl-color-accent-high: #93c5fd;
+}
+
+/* Optional: tighten the splash hero a touch */
+.hero h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}

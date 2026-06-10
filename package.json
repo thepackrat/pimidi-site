@@ -1,0 +1,24 @@
+{
+  "name": "pimidi-site",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync-docs": "node scripts/sync-docs.mjs",
+    "predev": "npm run sync-docs",
+    "prebuild": "npm run sync-docs",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.30.0",
+    "astro": "^5.0.0",
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "typescript": "^5.5.0"
+  }
+}

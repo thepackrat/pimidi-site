@@ -1,0 +1,23 @@
+# Cloudflare Workers static-assets config.
+#
+# The Cloudflare project was created as a Workers project (the deploy
+# command in the build log is `wrangler deploy`, not `wrangler pages
+# deploy`), so we use the Workers Static Assets shape rather than the
+# classic Pages config.
+#
+# Without our own wrangler.toml, Cloudflare's build pipeline detects
+# Astro and auto-runs `astro add cloudflare`, which forces the SSR
+# adapter and then breaks on a public/.assetsignore lookup. Providing
+# this file pre-empts the auto-add: wrangler sees the project is
+# already configured, skips the adapter installation, and just
+# uploads dist/ as static assets bound to the ASSETS binding.
+#
+# main is intentionally omitted — that signals "no Worker code,
+# static-only." Assets handle every request directly.
+
+name = "pimidi-site"
+compatibility_date = "2026-06-11"
+
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"

@@ -1,0 +1,11 @@
+# Cloudflare wrangler reads this file when packaging static assets
+# for the Workers/Pages deploy pipeline. It works the same way as
+# .gitignore — patterns listed here are excluded from the asset
+# upload. Empty file means: upload everything in public/.
+#
+# Cloudflare Pages auto-runs `astro add cloudflare` on Astro projects
+# during the deploy step, which configures the project to use the
+# Workers asset pipeline. That pipeline requires this file to exist
+# (it's an error, not a warning, if it's missing) — hence the empty
+# placeholder. If we ever want to exclude an asset from publication
+# (a draft PNG, an internal CSS file, etc.), list its pattern here.

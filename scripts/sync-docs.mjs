@@ -57,35 +57,66 @@ await loadDotEnv();
 
 const REPO = process.env.PIMIDI_REPO || "thepackrat/pimidi";
 const REF = process.env.PIMIDI_REF || "main";
-const RAW = `https://raw.githubusercontent.com/${REPO}/${REF}/web/docs`;
 
-// The pimidi code repo is currently private, so the raw endpoint
-// 404s without auth. Set PIMIDI_TOKEN (locally in .env or as a
-// Cloudflare Pages env var) to a fine-grained PAT scoped to the
-// pimidi repo with Contents:Read. If the repo ever goes public the
-// token becomes optional and these fetches work anonymously.
+// Use the GitHub API rather than raw.githubusercontent.com. The
+// raw endpoint works for public repos but has been inconsistent for
+// private repos with fine-grained PATs; the contents API is the
+// official path and handles auth reliably. With
+// `Accept: application/vnd.github.raw` the response body IS the file
+// content (no base64 unwrap step needed).
+const API = `https://api.github.com/repos/${REPO}/contents/web/docs`;
+
+// The pimidi code repo is currently private, so the API needs auth.
+// Set PIMIDI_TOKEN (locally in .env or as a Cloudflare Pages env
+// var) to a fine-grained PAT scoped to the pimidi repo with
+// Contents: Read. If the repo ever goes public the token becomes
+// optional and the API answers anonymously.
 const TOKEN = process.env.PIMIDI_TOKEN || process.env.GH_TOKEN || "";
-const headers = TOKEN
-  ? { Authorization: `Bearer ${TOKEN}`, "User-Agent": "pimidi-site-sync" }
-  : { "User-Agent": "pimidi-site-sync" };
+const baseHeaders = {
+  "User-Agent": "pimidi-site-sync",
+  ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+};
 
-async function getJSON(url) {
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    if (res.status === 404 && !TOKEN) {
-      throw new Error(
-        `fetch ${url}: 404 — the pimidi code repo is private. Set PIMIDI_TOKEN to a fine-grained PAT with Contents:Read on ${REPO}.`,
-      );
-    }
-    throw new Error(`fetch ${url}: ${res.status} ${res.statusText}`);
+function diagnoseError(url, status, statusText) {
+  if (status === 404 && !TOKEN) {
+    return new Error(
+      `fetch ${url}: 404 — repo is private (or path missing). Set PIMIDI_TOKEN to a fine-grained PAT with Contents: Read on ${REPO}.`,
+    );
   }
-  return await res.json();
+  if (status === 404 && TOKEN) {
+    return new Error(
+      `fetch ${url}: 404 with PIMIDI_TOKEN set. Token may be missing Contents:Read on ${REPO}, scoped to the wrong repo, or expired. Verify at https://github.com/settings/tokens.`,
+    );
+  }
+  if (status === 401) {
+    return new Error(
+      `fetch ${url}: 401 — PIMIDI_TOKEN is rejected by GitHub (invalid / expired / revoked).`,
+    );
+  }
+  if (status === 403) {
+    return new Error(
+      `fetch ${url}: 403 — token authenticated but lacks permission, or rate-limited. Check the PAT's repo permissions.`,
+    );
+  }
+  return new Error(`fetch ${url}: ${status} ${statusText}`);
 }
 
+// Both helpers ask for the raw file body via Accept:
+// application/vnd.github.raw — the contents API otherwise wraps the
+// payload in a metadata envelope with base64-encoded content. For
+// our use both index.json and the .md files are themselves the
+// content we want, so raw is what we always need.
 async function getText(url) {
-  const res = await fetch(url, { headers });
-  if (!res.ok) throw new Error(`fetch ${url}: ${res.status} ${res.statusText}`);
+  const res = await fetch(url, {
+    headers: { ...baseHeaders, Accept: "application/vnd.github.raw" },
+  });
+  if (!res.ok) throw diagnoseError(url, res.status, res.statusText);
   return await res.text();
+}
+
+async function getJSON(url) {
+  const text = await getText(url);
+  return JSON.parse(text);
 }
 
 // Slug → kebab-case file basename (just strip an optional .md).
@@ -101,7 +132,10 @@ function stripLeadingH1(md) {
 }
 
 async function main() {
-  console.log(`[sync-docs] source: ${RAW}`);
+  console.log(`[sync-docs] source: ${REPO}@${REF} (api.github.com)`);
+  console.log(
+    `[sync-docs] auth: ${TOKEN ? `PIMIDI_TOKEN present (len=${TOKEN.length})` : "anonymous"}`,
+  );
 
   await mkdir(docsOut, { recursive: true });
 
@@ -115,7 +149,7 @@ async function main() {
       .map((f) => rm(join(docsOut, f), { force: true })),
   );
 
-  const index = await getJSON(`${RAW}/index.json`);
+  const index = await getJSON(`${API}/index.json?ref=${REF}`);
   if (!Array.isArray(index.topics) || index.topics.length === 0) {
     throw new Error("source index.json has no topics");
   }
@@ -128,7 +162,7 @@ async function main() {
     const order = i + 1;
     const title = topic.title || slug;
 
-    const mdUrl = `${RAW}/${slug}.md`;
+    const mdUrl = `${API}/${slug}.md?ref=${REF}`;
     const raw = await getText(mdUrl);
     const body = stripLeadingH1(raw);
 

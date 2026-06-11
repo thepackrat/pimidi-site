@@ -177,7 +177,11 @@ async function main() {
 
     const out = join(docsOut, `${slug}.md`);
     await writeFile(out, frontmatter + body);
-    sidebarItems.push({ label: title, slug: `docs/${slug}` });
+    // Sidebar slug = entry slug, which for a file at
+    // src/content/docs/<name>.md is just <name>. (Would only carry a
+    // path prefix if we nested the docs under src/content/docs/<dir>/,
+    // which we don't; flat is fine for the doc count we have.)
+    sidebarItems.push({ label: title, slug });
     console.log(`[sync-docs]   wrote ${slug}.md  (${title})`);
   }
 

@@ -1,0 +1,25 @@
+// Cloudflare Workers Static Assets config (pure static, no SSR).
+//
+// Cloudflare's deploy pipeline auto-runs `astro add cloudflare` when
+// it can't find a project config — and looks for wrangler.jsonc
+// specifically (the format its own suggestion creates). A wrangler.toml
+// at repo root was silently ignored. This file mirrors the
+// auto-suggested shape minus the SSR `main` entry so wrangler treats
+// the project as already configured and skips the adapter
+// installation.
+//
+// `main` is intentionally absent — that's the signal for "static
+// assets only, no Worker code." Every request is served directly from
+// dist/ via the ASSETS binding.
+
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pimidi-site",
+  "compatibility_date": "2026-06-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
